@@ -1,15 +1,16 @@
 //
-//  ViewController.swift
+//  BLEconnectViewController.swift
 //  Bartender_final_1210
 //
-//  Created by Christian on 2019/12/10.
+//  Created by Christian on 2019/12/14.
 //  Copyright © 2019 Christian. All rights reserved.
 //
 
 import UIKit
+import CoreBluetooth
 
-class ViewController: UIViewController {
-
+class BLEconnectViewController: UIViewController {
+    
     private var tempTimer = Timer()
     private var TimerCount = 0
     
@@ -35,22 +36,20 @@ class ViewController: UIViewController {
         return label
     }()
     
-    private let BLEconnect_btn: UIButton = {
-        let btn = UIButton()
-        btn.setImage(UIImage(named: "Start_off"), for: .normal)
-        return btn
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-                
+
         setupNotificationObservers()
         setupCircleLayers()
         setupPercentageLabel()
         titleViewSetting()
-        addBLEButton()
         
         tempTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { (timer) in self.animationCountDown()}
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: {
+            print("GoToMenu")
+            self.performSegue(withIdentifier: "GoToMenu", sender: self)
+        })
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -64,32 +63,7 @@ class ViewController: UIViewController {
     @objc private func handleEnterForeground() {
         animatePulsatingLayer()
     }
-    
-    private func addBLEButton() {
-        BLEconnect_btn.frame = CGRect(x: 0, y: 0, width: self.view.frame.width * 0.36, height: self.view.frame.width * 0.12)
-        BLEconnect_btn.center = CGPoint(x: self.view.frame.midX, y: self.view.frame.maxY * 0.85)
-        
-        let tap = UILongPressGestureRecognizer(target: self, action: #selector(tapHandler))
-        tap.minimumPressDuration = 0
-        BLEconnect_btn.addGestureRecognizer(tap)
-        BLEconnect_btn.isUserInteractionEnabled = false
-        BLEconnect_btn.alpha = 0
-        
-        self.view.addSubview(BLEconnect_btn)
-    }
-    
-    @objc func tapHandler(gesture: UITapGestureRecognizer) {
-        switch gesture.state {
-        case .began:
-            BLEconnect_btn.setImage(UIImage(named: "Start_on"), for: .normal)
-        case .ended:
-            BLEconnect_btn.setImage(UIImage(named: "Start_off"), for: .normal)
-            performSegue(withIdentifier: "GoToBleConnect", sender: self)
-        default:
-            print("BLEconnect_btn does not be tapped!!!!")
-        }
-    }
-    
+
     private func createCircleShapeLayer(strokeColor: UIColor, fillColor: UIColor) -> CAShapeLayer {
         let layer = CAShapeLayer()
         let circularPath = UIBezierPath(arcCenter: .zero, radius: 100, startAngle: 0, endAngle: 2 * CGFloat.pi, clockwise: true)
@@ -147,7 +121,7 @@ class ViewController: UIViewController {
         self.view.addSubview(gradientView)
         
         let label = UILabel(frame: gradientView.bounds)
-        label.text = "Bartender"
+        label.text = "BLE Connect"
         label.font = UIFont(name: "TimeBurner", size: 56.0)
          
         label.textAlignment = .center
@@ -190,30 +164,7 @@ class ViewController: UIViewController {
                     self.view.addSubview(self.finishLabel)
                     self.finishLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 25)
                     self.finishLabel.center = CGPoint(x: self.view.frame.midX, y: self.percentageLabel.frame.midY + 30)
-                    UIViewPropertyAnimator.runningPropertyAnimator(
-                        withDuration: 0.8,
-                        delay: 0,
-                        options: [],
-                        animations: {
-                            self.BLEconnect_btn.alpha = 1
-                            self.BLEconnect_btn.isUserInteractionEnabled = true
-                        },
-                        completion: nil)
             })
         }
     }
-}
-
-extension UIColor {
-    
-    static func rgb(r: CGFloat, g: CGFloat, b: CGFloat) -> UIColor {
-        return UIColor(red: r/255, green: g/255, blue: b/255, alpha: 1)
-    }
-    
-    static let backgroundColor = UIColor.rgb(r: 21, g: 22, b: 33)
-    static let LabelgradientUpperColor = UIColor.rgb(r: 0, g: 249, b: 0)
-    static let LabelgradientLowerColor = UIColor.rgb(r: 0, g: 118, b: 186)
-    static let outlineStrokeColor = UIColor.rgb(r: 48, g: 228, b: 71)
-    static let trackStrokeColor = UIColor.rgb(r: 56, g: 25, b: 49)
-    static let pulsatingFillColor = UIColor.rgb(r: 88, g: 142, b: 106)
 }
